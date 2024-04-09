@@ -130,5 +130,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-data/
 streamlit-gis-env/
+gh-population-count-per-district.csv

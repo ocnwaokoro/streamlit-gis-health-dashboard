@@ -191,16 +191,16 @@ def app():
   def DISTRICT_MAP():
       m = leafmap.Map(center=(7.9465, -1.0232), width=width,height=height) 
       # Add the first layer
-      districts = gpd.read_file("data/GH/gh-districts-polygons.geojson")
-      df_fac_dis = pd.read_csv("data/GH/gh-facilities-per-district.csv")
-      df_pop_dis = pd.read_csv("data/GH/gh-population-count-per-district.csv")
+      districts = gpd.read_file("apps/data/GH/gh-districts-polygons.geojson")
+      df_fac_dis = pd.read_csv("apps/data/GH/gh-facilities-per-district.csv")
+      df_pop_dis = pd.read_csv("apps/data/GH/gh-dis-pop-fac.csv")
       df_fac_pop_dis = pd.DataFrame()
       df_fac_pop_dis["district"] = df_fac_dis["District_2"].unique()
       df_fac_pop_dis = df_fac_pop_dis.dropna()
       for district in df_fac_pop_dis["district"]:
-          pop = df_pop_dis[df_pop_dis["District"]==district]["VALUE"].sum()
+          pop = df_pop_dis[df_pop_dis["DISTRICT"]==district]["POPULATION"].iloc[0]
           df_fac_pop_dis.loc[list(df_fac_pop_dis["district"]).index(district),"POPULATION"] = pop
-          fac = len(df_fac_dis[df_fac_dis["District_2"]==district])
+          fac = df_pop_dis[df_pop_dis["DISTRICT"]==district]["FACILITIES"].iloc[0]
           df_fac_pop_dis.loc[list(df_fac_pop_dis["district"]).index(district),"FACILITIES"] = fac
       districts_pop_fac_df = districts.join(df_fac_pop_dis.set_index('district'), on="District")
       districts_pop_fac_df['DISTRICT'] = districts_pop_fac_df['District']
@@ -209,6 +209,7 @@ def app():
       m.add_gdf(dis, layer_name='Districts')
       m.config = config
       return m
+
   st.title(APP_TITLE)
   st.caption(APP_SUB_TITLE)
   col1, col2 = st.columns(2)

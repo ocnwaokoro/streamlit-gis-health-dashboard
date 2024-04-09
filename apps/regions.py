@@ -189,16 +189,16 @@ def app():
   @st.cache_resource(show_spinner="Loading Map...")
   def REGION_MAP():
       m = leafmap.Map(center=(7.9465, -1.0232), width=width,height=height) 
-      regions = gpd.read_file("data/GH-2/gh-regions-polygons.geojson")
-      df_fac_reg = pd.read_csv("data/GH/gh-facilities-per-region.csv")
-      df_pop_reg = pd.read_csv("data/GH/gh-population-count-per-region.csv")
+      regions = gpd.read_file("apps/data/GH-2/gh-regions-polygons.geojson")
+      df_fac_reg = pd.read_csv("apps/data/GH/gh-facilities-per-region.csv")
+      df_pop_reg = pd.read_csv("apps/data/GH/gh-reg-pop-fac.csv")
       df_fac_pop_reg = pd.DataFrame()
       df_fac_pop_reg["region"] = df_fac_reg["Region_202"].unique()
       df_fac_pop_reg = df_fac_pop_reg.dropna()
       for region in df_fac_pop_reg["region"]:
-          pop = df_pop_reg[df_pop_reg["Region_202"]==region]["VALUE"].sum()
+          pop = df_pop_reg[df_pop_reg["REGION"]==region]["POPULATION"].iloc[0]
           df_fac_pop_reg.loc[list(df_fac_pop_reg["region"]).index(region),"POPULATION"] = pop
-          fac = len(df_fac_reg[df_fac_reg["Region_202"]==region])
+          fac = df_pop_reg[df_pop_reg["REGION"]==region]["FACILITIES"].iloc[0]
           df_fac_pop_reg.loc[list(df_fac_pop_reg["region"]).index(region),"FACILITIES"] = fac
       df_fac_pop_reg['region'] = df_fac_pop_reg['region'].map(str.upper)
       regions_pop_fac_df = regions.join(df_fac_pop_reg.set_index('region'), on="REGION")
