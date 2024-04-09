@@ -85,8 +85,8 @@ def app():
         'radiusScale': 'linear'}},
       {'id': 'v4ysqjj',
       'type': 'geojson',
-      'config': {'dataId': 'Regions',
-        'label': 'Regions',
+      'config': {'dataId': 'Districts',
+        'label': 'Districts',
         'color': [221, 178, 124],
         'highlightColor': [252, 242, 26, 255],
         'columns': {'geojson': '_geojson'},
@@ -149,7 +149,8 @@ def app():
         {'name': 'DISTRICT', 'format': None},
         {'name': 'TYPE', 'format': None},
         {'name': 'OWNERSHIP', 'format': None}],
-        'Regions': [{'name': 'REGION', 'format': None},
+        'Districts': [{'name': 'DISTRICT', 'format': None},
+        {'name': 'REGION', 'format': None},
         {'name': 'POPULATION', 'format': None},
         {'name': 'FACILITIES', 'format': None}]},
       'compareMode': False,
@@ -201,10 +202,11 @@ def app():
           df_fac_pop_dis.loc[list(df_fac_pop_dis["district"]).index(district),"POPULATION"] = pop
           fac = len(df_fac_dis[df_fac_dis["District_2"]==district])
           df_fac_pop_dis.loc[list(df_fac_pop_dis["district"]).index(district),"FACILITIES"] = fac
-      # df_fac_pop_reg['region'] = df_fac_pop_reg['region'].map(str.upper)
       districts_pop_fac_df = districts.join(df_fac_pop_dis.set_index('district'), on="District")
-      dis = districts_pop_fac_df
-      m.add_gdf(dis, layer_name='Regions')
+      districts_pop_fac_df['DISTRICT'] = districts_pop_fac_df['District']
+      districts_pop_fac_df['REGION'] = districts_pop_fac_df['Region']
+      dis = districts_pop_fac_df[['DISTRICT','REGION','POPULATION','FACILITIES','geometry']]
+      m.add_gdf(dis, layer_name='Districts')
       m.config = config
       return m
   st.title(APP_TITLE)
@@ -215,3 +217,23 @@ def app():
       DISTRICT_MAP().to_streamlit(width=width, height=height)
   with col2:
       st.markdown("<h2 style='text-align: center; color: black;'>Districts Info </h2>", unsafe_allow_html=True)
+      df_pop_fac_dis = pd.read_csv("apps/data/GH/gh-dis-pop-fac.csv")
+      options = df_pop_fac_dis['REGION'].unique()
+      region = st.selectbox("Region", options, index=None,label_visibility='hidden',placeholder='Choose a Region')
+      df = df_pop_fac_dis.copy()
+      if region:
+          df = df[df['REGION']==region]
+      options = df['DISTRICT'].unique()
+      district = st.selectbox("District", options, index=None,label_visibility='collapsed',placeholder='Choose a District')
+      if district:
+          df = df[df['DISTRICT']==district]
+          col2_1, col2_2 = st.columns(2)
+          with col2_1:
+              metric_title = f"Health Facility Count"
+              st.metric(metric_title, '{:,}'.format(df['FACILITIES'].iloc[0]))
+          with col2_2:
+              metric_title = f"Population"
+              st.metric(metric_title, '{:,}'.format(df['POPULATION'].iloc[0]))
+          st.dataframe(df, hide_index=True)
+      else:
+          st.dataframe(df, hide_index=True)

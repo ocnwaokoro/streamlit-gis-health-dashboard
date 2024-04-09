@@ -214,3 +214,18 @@ def app():
       REGION_MAP().to_streamlit(width=width, height=height)
   with col2:
       st.markdown("<h2 style='text-align: center; color: black;'>Regions Info </h2>", unsafe_allow_html=True)
+      df_pop_fac_reg = pd.read_csv("apps/data/GH/gh-reg-pop-fac.csv")
+      options = df_pop_fac_reg['REGION'].unique()
+      region = st.selectbox("Region", options, index=None,label_visibility='hidden',placeholder='Choose a Region')
+      if region:
+          df = df_pop_fac_reg[df_pop_fac_reg['REGION']==region]
+          col2_1, col2_2 = st.columns(2)
+          with col2_1:
+              metric_title = f"Health Facility Count"
+              st.metric(metric_title, '{:,}'.format(df['FACILITIES'].iloc[0]))
+          with col2_2:
+              metric_title = f"Population"
+              st.metric(metric_title, '{:,}'.format(df['POPULATION'].iloc[0]))
+          st.dataframe(df, hide_index=True)
+      else:
+          st.dataframe(df_pop_fac_reg, hide_index=True)

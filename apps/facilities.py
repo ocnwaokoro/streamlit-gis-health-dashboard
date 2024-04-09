@@ -220,4 +220,67 @@ def app():
     st.markdown("<h2 style='text-align: center; color: black;'> Facilities Map </h2>", unsafe_allow_html=True)
     FACILITY_MAP().to_streamlit(width=width, height=height)
   with col2:
-    st.markdown("<h2 style='text-align: center; color: black;'> Facilities Info </h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: black;'>Facilities Filter </h2>", unsafe_allow_html=True)
+    df_fac = pd.read_csv("data/GH/gh-facilities-per-district.csv")
+    df_fac['REGION'] = df_fac['Region_2']
+    df_fac['DISTRICT'] = df_fac['District_2']
+    options = df_fac['REGION'].dropna().unique()
+    region = st.selectbox("Region", options, index=None,label_visibility='collapsed',placeholder='Choose a Region')
+    df = df_fac[['FACILITY','REGION','DISTRICT','SUBDIS','TYPE','OWNERSHIP',]].copy()
+    if region:
+        df = df[df['REGION']==region]
+    options = df['DISTRICT'].dropna().unique()
+    district = st.selectbox(' ', options, index=None, label_visibility='collapsed', placeholder='Choose a District')
+    if district:
+        df = df[df['DISTRICT']==district]
+    options = df['TYPE'].dropna().unique()
+    fac_type = st.selectbox(' ', options, index=None, label_visibility='collapsed', placeholder='Choose a Facility Type')
+    if fac_type:
+        df = df[df['TYPE']==fac_type]
+    options = df['OWNERSHIP'].dropna().unique()
+    owner = st.selectbox(' ', options, index=None, label_visibility='collapsed', placeholder='Choose the Ownership')
+    if owner:
+        df = df[df['OWNERSHIP']==owner]
+    st.dataframe(df, hide_index=True)
+
+  df[df['TYPE']=='Community Health Planning Services (CHPS) Compound'] = 'CHPS Compound'
+  df[df['TYPE']=='Reproductive & Child Health (RCH)'] = 'RCH'
+  df[df['OWNERSHIP']=='Christian Health Association of Ghana (CHAG)'] = 'CHAG'
+  df[df['OWNERSHIP']=='Non-Governmental Organisation (NGO)'] = 'NGO'
+
+  df_fac[df_fac['TYPE']=='Community Health Planning Services (CHPS) Compound'] = 'CHPS Compound'
+  df_fac[df_fac['TYPE']=='Reproductive & Child Health (RCH)'] = 'RCH'
+  df_fac[df_fac['OWNERSHIP']=='Christian Health Association of Ghana (CHAG)'] = 'CHAG'
+  df_fac[df_fac['OWNERSHIP']=='Non-Governmental Organisation (NGO)'] = 'NGO'
+
+  st.subheader("Facility Type Info")
+  metric_title = 's'
+  fac_types = df_fac['TYPE'].dropna().unique()
+  fac_type_counts = sorted([(fac_type, sum(df['TYPE']==fac_type)) for fac_type in fac_types], 
+                          key=lambda x: x[1], 
+                          reverse=True)
+  grid = st.columns(7)
+  for col in range(7):
+      with grid[col]:
+          st.metric(f'{fac_type_counts[col][0]}{metric_title}', fac_type_counts[col][1])
+  grid = st.columns(7)
+  for col in range(7):
+      with grid[col]:
+          st.metric(f'{fac_type_counts[7+col][0]}{metric_title}', fac_type_counts[7+col][1])
+
+
+  st.subheader("Ownership Info")
+  metric_title = 's'
+  ownerships = df_fac['OWNERSHIP'].dropna().unique()
+  ownership_counts = sorted([(ownership, sum(df['TYPE']==ownership)) for ownership in ownerships], 
+                          key=lambda x: x[1], 
+                          reverse=True)
+  num_cols = 4
+  grid = st.columns(num_cols)
+  for col in range(num_cols):
+      with grid[col]:
+          st.metric(f'{ownership_counts[col][0]}{metric_title}', ownership_counts[col][1])
+  grid = st.columns(num_cols)
+  for col in range(num_cols):
+      with grid[col]:
+          st.metric(f'{ownership_counts[num_cols+col][0]}{metric_title}', ownership_counts[num_cols+col][1])
