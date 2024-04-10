@@ -5,7 +5,6 @@ import time
 st.set_page_config(
     page_title='Ghana Health Access Dashboard', 
     layout='wide',
-    initial_sidebar_state='collapsed',
     page_icon='🗺️')
 
 from apps import facilities, districts, regions  # import your app modules here
