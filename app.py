@@ -28,7 +28,7 @@ params = st.query_params
 if "page" in params:
     default_index = int(titles_lower.index(params["page"][0].lower()))
 else:
-    default_index = -1
+    default_index = 2
 
 with st.sidebar:
     selected = option_menu(
